@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Månelampe – interaktiv brukerveiledning</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(145deg, #1b2b4e 0%, #2c3f66 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            color: #f0e9e0;
+        }
+        .manual-card {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 60px 60px 40px 40px;
+            box-shadow: 0 25px 50px -8px rgba(0,0,0,0.6), 0 0 0 2px rgba(255,220,150,0.2) inset;
+            overflow: hidden;
+            border: 1px solid rgba(255,245,210,0.3);
+            transition: box-shadow 0.3s;
+        }
+        .manual-card:hover {
+            box-shadow: 0 30px 60px -5px #00000080, 0 0 0 3px #ffdead inset;
+        }
+        .moon-header {
+            background: #0f1a2b;
+            padding: 20px 20px 15px 20px; /* Redusert padding for bedre plass */
+            text-align: center;
+            border-bottom: 2px solid #f7c35c;
+            position: relative;
+        }
+        h1 {
+            font-weight: 700;
+            font-size: 2.2rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px #f8b86a, 0 0 30px #ffa25b;
+            margin-bottom: 5px;
+            color: #fff5e6;
+        }
+        .sub {
+            font-size: 1.1rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        .interactive-moon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 5px 0 5px;
+        }
+        .moon-display {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            background: #fef8e7;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ffcf9a, 0 0 80px #fbb55c, 0 0 120px #ff9f4b, inset -10px -5px 15px rgba(0,0,0,0.2);
+            transition: background-color 0.3s, box-shadow 0.3s, transform 0.2s;
+            cursor: pointer;
+            border: 4px solid #fff2d2;
+        }
+        .moon-display:active {
+            transform: scale(0.97);
+        }
+        .crater {
+            position: absolute;
+            background: rgba(150, 120, 90, 0.2);
+            border-radius: 50%;
+        }
+        .crater1 { width: 25px; height: 25px; top: 30px; left: 25px; }
+        .crater2 { width: 35px; height: 35px; bottom: 25px; right: 25px; background: rgba(130, 100, 70, 0.25); }
+        .crater3 { width: 18px; height: 18px; top: 85px; left: 95px; }
+        .led-dots {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin: 10px 0 5px;
+        }
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffe18e;
+            box-shadow: 0 0 10px currentColor;
+            transition: opacity 0.2s, background 0.2s, transform 0.2s;
+        }
+        .dot.active {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+        .dot.inactive {
+            opacity: 0.25;
+            background: #a7a7a7;
+        }
+        .button-row {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 10px 0 5px;
+        }
+        .moon-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #2a3c5e;
+            border: none;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 0 #0f1a2b, 0 8px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.1s ease;
+            border: 1px solid #ffdb9f;
+            min-width: 90px;
+        }
+        .moon-btn i {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+            filter: drop-shadow(0 0 6px gold);
+        }
+        .moon-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0f1a2b, 0 5px 12px black;
+        }
+        .sim-display {
+            background: #111c28;
+            padding: 6px 12px;
+            border-radius: 30px;
+            display: inline-block;
+            margin: 5px auto 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+            color: #ffcd94;
+            border: 2px solid #a67c52;
+            box-shadow: inset 0 0 10px #00000055;
+        }
+        .sim-display span {
+            display: inline-block;
+            width: 28px;
+            text-align: center;
+        }
+        .dot-indicator {
+            font-size: 1.8rem;
+            color: #ffcd94;
+            margin: 0 2px;
+        }
+        .content {
+            padding: 20px 30px 30px;
+        }
+        .quick-start {
+            background: #1e3146d0;
+            border-radius: 40px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #c9a56b;
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+        }
+        .quick-start:hover {
+            background: #233a55d0;
+            border-color: #f7c27a;
+        }
+        h2 {
+            font-size: 1.8rem;
+            border-left: 12px solid #f7b731;
+            padding-left: 18px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-shadow: 0 2px 5px #00000050;
+        }
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+        }
+        .step {
+            flex: 1 1 140px;
+            background: #2c405bc0;
+            border-radius: 30px;
+            padding: 15px 8px;
+            text-align: center;
+            backdrop-filter: blur(2px);
+            border: 1px solid #edc285;
+            transition: all 0.2s;
+        }
+        .step:hover {
+            transform: scale(1.02);
+            background: #34527a;
+            border-color: #fcd396;
+            box-shadow: 0 0 25px #ffb86b;
+        }
+        .step i {
+            font-size: 2rem;
+            color: #ffd98c;
+            margin-bottom: 6px;
+        }
+        .step .btn-icon {
+            font-weight: 700;
+            background: #00000040;
+            border-radius: 40px;
+            padding: 4px 8px;
+            display: inline-block;
+            margin: 5px 0 2px;
+            font-size: 1.2rem;
+        }
+        .detail-section {
+            margin: 25px 0;
+        }
+        .detail-item {
+            background: #25364eb0;
+            border-radius: 50px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(2px);
+            border: 1px solid #b5905d;
+            transition: 0.2s;
+        }
+        .detail-header {
+            padding: 15px 25px;
+            font-weight: 700;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            user-select: none;
+        }
+        .detail-header i {
+            font-size: 1.8rem;
+            transition: transform 0.3s;
+            color: #ffc489;
+        }
+        .detail-header.open i {
+            transform: rotate(90deg);
+        }
+        .detail-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0 25px 0 55px;
+            color: #f0e2d0;
+        }
+        .detail-content.show {
+            max-height: 800px;
+            padding-bottom: 20px;
+        }
+        .detail-content ul, .detail-content p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        .detail-content code {
+            background: #00000040;
+            padding: 2px 6px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            color: #ffd58c;
+        }
+        .viktig {
+            background: #2e4d3e;
+            border-left: 20px solid #f9d77e;
+            padding: 18px 22px;
+            border-radius: 40px;
+            margin: 25px 0 5px;
+            font-size: 1.1rem;
+            animation: gentle-pulse 2s infinite;
+        }
+        @keyframes gentle-pulse {
+            0% { box-shadow: 0 0 0 0 #f9d77e80; }
+            50% { box-shadow: 0 0 25px 8px #f9d77e40; }
+            100% { box-shadow: 0 0 0 0 #f9d77e80; }
+        }
+        footer {
+            text-align: center;
+            margin-top: 25px;
+            opacity: 0.8;
+        }
+        hr {
+            border: 1px solid #ebc179;
+            width: 80%;
+            margin: 15px auto;
+        }
+        .clickable-badge {
+            background: #f7b731;
+            border-radius: 30px;
+            padding: 4px 15px;
+            color: #1d1e2c;
+            font-weight: 700;
+        }
+        /* Responsive justeringer */
+        @media (max-width: 700px) {
+            .button-row {
+                gap: 15px;
+            }
+            .moon-btn {
+                min-width: 70px;
+                font-size: 0.9rem;
+                padding: 6px 10px;
+            }
+            .moon-btn i {
+                font-size: 1.5rem;
+            }
+            .sim-display {
+                font-size: 1.5rem;
+            }
+            .sim-display span {
+                width: 22px;
+            }
+            .dot-indicator {
+                font-size: 1.5rem;
+            }
+            .content {
+                padding: 15px 15px 20px;
+            }
+            h2 {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="manual-card">
+        <div class="moon-header">
+            <h1>🌙 Månelampe</h1>
+            <div class="sub">søvntrener med varmt lys</div>
+
+            <div class="interactive-moon">
+                <div class="moon-display" id="moonSphere">
+                    <div class="crater crater1"></div>
+                    <div class="crater crater2"></div>
+                    <div class="crater crater3"></div>
+                </div>
+
+                <div class="led-dots" id="ledDots">
+                    <span class="dot" id="dot1"></span>
+                    <span class="dot" id="dot2"></span>
+                    <span class="dot" id="dot3"></span>
+                    <span class="dot" id="dot4"></span>
+                    <span class="dot" id="dot5"></span>
+                </div>
+
+                <div class="sim-display" id="simDisplay">
+                    <span>1</span><span>2</span><span class="dot-indicator">.</span><span>3</span><span>0</span>
+                </div>
+
+                <div class="button-row">
+                    <button class="moon-btn" id="btnLeft" title="Venstre knapp (farge)"><i class="fas fa-palette"></i> VENSTRE</button>
+                    <button class="moon-btn" id="btnMid" title="Midtre knapp (av/på, meny)"><i class="fas fa-power-off"></i> MIDTRE</button>
+                    <button class="moon-btn" id="btnRight" title="Høyre knapp (lysstyrke)"><i class="fas fa-sun"></i> HØYRE</button>
+                </div>
+                <p style="margin-top: 5px; font-size:0.8rem;"><i class="fas fa-hand-pointer"></i> Klikk på knappene eller månen for å prøve</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="quick-start">
+                <h2>⚡ Hurtigveiledning</h2>
+                <div class="steps">
+                    <div class="step"><i class="fas fa-plug"></i><br><span class="btn-icon">1</span> Koble til USB</div>
+                    <div class="step"><i class="fas fa-circle" style="color: #ffe59a;"></i><br><span class="btn-icon">2</span> MIDTRE = på/av</div>
+                    <div class="step"><i class="fas fa-paint-brush"></i><br><span class="btn-icon">3</span> VENSTRE = farge</div>
+                    <div class="step"><i class="fas fa-adjust"></i><br><span class="btn-icon">4</span> HØYRE = lysstyrke</div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-item">
+                    <div class="detail-header" onclick="toggleDetail(this)">
+                        <i class="fas fa-chevron-right"></i> <span>🔹 Detaljert funksjonalitet</span>
+                    </div>
+                    <div class="detail-content">
+                        <p><strong>Fargevalg (venstre knapp):</strong> Varmhvitt → Kaldhvitt → Fargehjul (ruller automatisk) → Låst farge (trykk igjen for å lagre) → tilbake til varmhvitt.</p>
+                        <p><strong>Lysstyrke (høyre knapp):</strong> 5 nivåer. Nivå 1: svakest, nivå 5: sterkest. Både prikker og månens lysstyrke endres.</p>
+                        <p><strong>Av/på (midtre knapp):</strong> Kort trykk veksler av/på.</p>
+                        <p><strong>Automatisk morgenrutine:</strong> <code>oran</code> = oransje (snart morgen), <code>morn</code> = grønn (oppvåkning – varer 1 time). Trykk på en knapp for å overstyre.</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-header" onclick="toggleDetail(this)">
+                        <i class="fas fa-chevron-right"></i> <span>⏰ Stille inn klokke og vekketider</span>
+                    </div>
+                    <div class="detail-content">
+                        <p><strong>Innstillingsmodus:</strong> Hold inne <code>MIDTRE</code> i 1,5 sek. Display viser <code>inst</code>.</p>
+                        <p><strong>Naviger:</strong> Kort trykk MIDTRE for å lagre og gå videre. Bruk VENSTRE/HØYRE for å endre verdi (ruller rundt).</p>
+                        <ul>
+                            <li><code>oran</code> – time/minutt for oransje lys</li>
+                            <li><code>morn</code> – time/minutt for grønt lys</li>
+                            <li><code>year</code> – år (4 siffer)</li>
+                            <li><code>mnth</code> – måned (1–12)</li>
+                            <li><code>day</code> – dag (venstre to slukket) f.eks. <code> 5</code></li>
+                            <li><code>dow</code> – ukedag (1 mandag–7 søndag) vist helt til høyre</li>
+                            <li><code>clk</code> – nåværende klokkeslett (time, minutt)</li>
+                        </ul>
+                        <p><strong>Avslutt:</strong> Etter siste minutt-innstilling, trykk MIDTRE kort – lampen slår seg av. <br>Hold MIDTRE inne 1,5 sek for å avslutte uten lagring.</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-header" onclick="toggleDetail(this)">
+                        <i class="fas fa-chevron-right"></i> <span>💡 Display-symboler</span>
+                    </div>
+                    <div class="detail-content">
+                        <p>Punktum (<code>.</code>) lyser mellom timer og minutter, f.eks. <code>12.30</code>. Under innstillinger slukkes sifre som ikke er i bruk (f.eks. dag: <code> 5</code>).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="viktig">
+                <i class="fas fa-exclamation-triangle" style="font-size:1.8rem; float:left; margin-right:15px;"></i>
+                <strong>⚠️ 24 timers klokkebackup:</strong> Kondensator holder klokken i kun ~24 timer uten strøm. Hvis lampen er frakoblet lenger, nullstilles klokken – da må den stilles på nytt (se over).
+            </div>
+
+            <hr>
+            <footer>
+                <p>✨ Klikk på månen eller knappene for å se farger og lys endre seg! ✨</p>
+                <p><i class="fas fa-heart" style="color:#ffab4f;"></i> Søte drømmer fra Månelampen</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const moon = document.getElementById('moonSphere');
+        const dots = [document.getElementById('dot1'),document.getElementById('dot2'),document.getElementById('dot3'),document.getElementById('dot4'),document.getElementById('dot5')];
+        const display = document.getElementById('simDisplay');
+
+        let powerOn = true;
+        // 0=varmhvit, 1=kaldhvit, 2=fargehjul (ruller), 3=låst egendefinert farge
+        let colorState = 0;
+        let brightness = 3;              // 1-5
+        let customColorIndex = 0;         // for fargehjul (0-627)
+        let lockedColorIndex = 0;          // når man låser i state 3
+
+        // faktor for lysstyrke (1-5)
+        const brightnessFactor = [0.2, 0.4, 0.6, 0.8, 1.0];
+
+        // base farger for varmhvit og kaldhvit (RGB)
+        const warmWhite = {r:255, g:225, b:180};
+        const coolWhite = {r:255, g:255, b:245};
+
+        function rainbowColorRGB(step) {
+            let r = Math.sin(step * 0.1) * 127 + 128;
+            let g = Math.sin(step * 0.1 + 2) * 127 + 128;
+            let b = Math.sin(step * 0.1 + 4) * 127 + 128;
+            return {r: Math.floor(r), g: Math.floor(g), b: Math.floor(b)};
+        }
+
+        function applyBrightness(rgb, level) {
+            let factor = brightnessFactor[level-1];
+            return {
+                r: Math.floor(rgb.r * factor),
+                g: Math.floor(rgb.g * factor),
+                b: Math.floor(rgb.b * factor)
+            };
+        }
+
+        function updateMoon() {
+            if (!powerOn) {
+                moon.style.background = '#3a404b';
+                moon.style.boxShadow = '0 0 20px #5f5f5f, inset -10px -5px 15px #1e1e1e';
+                dots.forEach((d) => d.className = 'dot inactive');
+                return;
+            }
+
+            // oppdater dots basert på brightness
+            dots.forEach((d, idx) => {
+                d.className = idx < brightness ? 'dot active' : 'dot inactive';
+            });
+
+            // finn base RGB basert på colorState
+            let baseRGB;
+            if (colorState === 0) {
+                baseRGB = warmWhite;
+            } else if (colorState === 1) {
+                baseRGB = coolWhite;
+            } else if (colorState === 2) {
+                baseRGB = rainbowColorRGB(customColorIndex);
+            } else { // state 3
+                baseRGB = rainbowColorRGB(lockedColorIndex);
+            }
+
+            // juster med lysstyrke
+            let finalRGB = applyBrightness(baseRGB, brightness);
+
+            let bgColor = `rgb(${finalRGB.r}, ${finalRGB.g}, ${finalRGB.b})`;
+            moon.style.background = bgColor;
+            moon.style.boxShadow = `0 0 40px ${bgColor}, 0 0 80px ${bgColor}, inset -10px -5px 15px rgba(0,0,0,0.2)`;
+        }
+
+        moon.addEventListener('click', () => {
+            powerOn = !powerOn;
+            updateMoon();
+            moon.style.transform = 'scale(0.95)';
+            setTimeout(() => moon.style.transform = '', 150);
+        });
+
+        document.getElementById('btnLeft').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!powerOn) powerOn = true;
+
+            if (colorState === 0) {
+                colorState = 1;
+            } else if (colorState === 1) {
+                colorState = 2;
+                customColorIndex = (customColorIndex + 30) % 628;
+            } else if (colorState === 2) {
+                lockedColorIndex = customColorIndex;
+                colorState = 3;
+            } else { // state 3
+                colorState = 0;
+            }
+
+            updateMoon();
+            let btn = e.currentTarget;
+            btn.style.transform = 'translateY(6px)';
+            setTimeout(() => btn.style.transform = '', 120);
+        });
+
+        document.getElementById('btnRight').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!powerOn) powerOn = true;
+            brightness = (brightness % 5) + 1; // 1->2,2->3,3->4,4->5,5->1
+            updateMoon();
+            let btn = e.currentTarget;
+            btn.style.transform = 'translateY(6px)';
+            setTimeout(() => btn.style.transform = '', 120);
+        });
+
+        document.getElementById('btnMid').addEventListener('click', (e) => {
+            e.stopPropagation();
+            powerOn = !powerOn;
+            updateMoon();
+            let btn = e.currentTarget;
+            btn.style.transform = 'translateY(6px)';
+            setTimeout(() => btn.style.transform = '', 120);
+        });
+
+        document.getElementById('btnMid').addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            alert('✨ Innstillingsmodus (simulert): Display viser "inst" og deretter "oran". I virkeligheten holder du knappen 1,5 sek.');
+            let originalHTML = display.innerHTML;
+            display.innerHTML = '<span>i</span><span>n</span><span class="dot-indicator">.</span><span>s</span><span>t</span>';
+            setTimeout(() => display.innerHTML = originalHTML, 1500);
+        });
+
+        // fargehjul-rulling kun i state 2
+        setInterval(() => {
+            if (powerOn && colorState === 2) {
+                customColorIndex = (customColorIndex + 1) % 628;
+                updateMoon();
+            }
+        }, 100);
+
+        updateMoon();
+
+        function toggleDetail(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('i');
+            content.classList.toggle('show');
+            icon.classList.toggle('open');
+            if (content.classList.contains('show')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                content.style.maxHeight = null;
+            }
+        }
+    </script>
+    <style>
+        .sim-display span { width: 28px; display: inline-block; text-align: center; font-weight: 600; }
+        .dot-indicator { width: auto !important; margin: 0 2px; }
+        @media (max-width: 700px) {
+            .sim-display span { width: 22px; }
+        }
+    </style>
+</body>
+</html>
