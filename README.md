@@ -13,19 +13,8 @@ Arduino-basert månelampe med RTC (Real-Time Clock) og NeoPixel LED-lys.
 ## Brukerveiledning
 
 En interaktiv brukerveiledning er tilgjengelig på:
-**[https://mads-[your-github-username].github.io/moonlamp/](https://mads-[your-github-username].github.io/moonlamp/)**
+**[https://MadsBornebusch.github.io/moonlamp/](https://MadsBornebusch.github.io/moonlamp/)**
 
-*(Oppdater lenken med ditt GitHub-brukernavn etter at GitHub Pages er aktivert)*
-
-## Oppsett av GitHub Pages
-
-1. Gå til repository-innstillingene på GitHub
-2. Naviger til "Pages" i venstre meny
-3. Under "Source", velg "Deploy from a branch"
-4. Velg `main` branch og `/ (root)` som mappe
-5. Klikk "Save"
-
-Siden vil være tilgjengelig på `https://[your-username].github.io/[repository-name]/` etter noen minutter.
 
 ## Hardware
 
