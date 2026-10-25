@@ -91,25 +91,17 @@
         .crater3 { width: 18px; height: 18px; top: 85px; left: 95px; }
         .led-dots {
             display: flex;
-            gap: 6px;
+            gap: 5px;
             justify-content: center;
-            margin: 10px 0 5px;
+            margin: 12px 0 8px;
         }
         .dot {
-            width: 14px;
-            height: 14px;
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
-            background: #ffe18e;
-            box-shadow: 0 0 10px currentColor;
-            transition: opacity 0.2s, background 0.2s, transform 0.2s;
-        }
-        .dot.active {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-        .dot.inactive {
-            opacity: 0.25;
-            background: #a7a7a7;
+            background: #4a4f5a;
+            opacity: 0.35;
+            transition: opacity 0.15s, background 0.15s, box-shadow 0.15s;
         }
         .button-row {
             display: flex;
@@ -143,29 +135,60 @@
             transform: translateY(6px);
             box-shadow: 0 2px 0 #0f1a2b, 0 5px 12px black;
         }
-        .sim-display {
-            background: #111c28;
-            padding: 6px 12px;
-            border-radius: 30px;
-            display: inline-block;
-            margin: 5px auto 0;
-            font-family: 'Courier New', monospace;
-            font-size: 1.8rem;
-            letter-spacing: 6px;
-            color: #ffcd94;
+        .seg-display {
+            display: flex;
+            gap: 4px;
+            background: #0b0d10;
+            padding: 10px 14px;
+            border-radius: 14px;
             border: 2px solid #a67c52;
-            box-shadow: inset 0 0 10px #00000055;
+            box-shadow: inset 0 0 12px #000000aa;
         }
-        .sim-display span {
-            display: inline-block;
-            width: 28px;
-            text-align: center;
+        .seg-display svg {
+            width: 38px;
+            height: 54px;
+            display: block;
         }
-        .dot-indicator {
-            font-size: 1.8rem;
-            color: #ffcd94;
-            margin: 0 2px;
+        .seg { fill: #2a1414; transition: fill 0.05s; }
+        .seg.on { fill: #ff3b2f; filter: drop-shadow(0 0 3px #ff3b2fcc); }
+        .moon-btn {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
+        .moon-btn.pressed {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0f1a2b, 0 5px 12px black;
+        }
+        .sim-hint {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        .sim-clock {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        .sim-clock strong {
+            font-variant-numeric: tabular-nums;
+            color: #ffd98c;
+        }
+        .sim-clock button {
+            background: #2a3c5e;
+            color: #f0e9e0;
+            border: 1px solid #c9a56b;
+            border-radius: 20px;
+            padding: 3px 10px;
+            font: inherit;
+            cursor: pointer;
+        }
+        .sim-clock button:hover { background: #34527a; }
         .content {
             padding: 20px 30px 30px;
         }
@@ -322,14 +345,16 @@
             .moon-btn i {
                 font-size: 1.5rem;
             }
-            .sim-display {
-                font-size: 1.5rem;
+            .seg-display svg {
+                width: 32px;
+                height: 46px;
             }
-            .sim-display span {
-                width: 22px;
+            .led-dots {
+                gap: 3px;
             }
-            .dot-indicator {
-                font-size: 1.5rem;
+            .dot {
+                width: 9px;
+                height: 9px;
             }
             .content {
                 padding: 15px 15px 20px;
@@ -353,24 +378,22 @@
                     <div class="crater crater3"></div>
                 </div>
 
-                <div class="led-dots" id="ledDots">
-                    <span class="dot" id="dot1"></span>
-                    <span class="dot" id="dot2"></span>
-                    <span class="dot" id="dot3"></span>
-                    <span class="dot" id="dot4"></span>
-                    <span class="dot" id="dot5"></span>
-                </div>
+                <div class="led-dots" id="ledDots" aria-hidden="true"></div>
 
-                <div class="sim-display" id="simDisplay">
-                    <span>1</span><span>2</span><span class="dot-indicator">.</span><span>3</span><span>0</span>
-                </div>
+                <div class="seg-display" id="segDisplay" role="img" aria-label="Display"></div>
 
                 <div class="button-row">
-                    <button class="moon-btn" id="btnLeft" title="Venstre knapp (farge)"><i class="fas fa-palette"></i> VENSTRE</button>
-                    <button class="moon-btn" id="btnMid" title="Midtre knapp (av/på, meny)"><i class="fas fa-power-off"></i> MIDTRE</button>
-                    <button class="moon-btn" id="btnRight" title="Høyre knapp (lysstyrke)"><i class="fas fa-sun"></i> HØYRE</button>
+                    <button class="moon-btn" id="btnLeft" title="Venstre knapp (farge, minus i innstillinger)"><i class="fas fa-palette"></i> VENSTRE</button>
+                    <button class="moon-btn" id="btnMid" title="Midtre knapp (av/på, hold for innstillinger)"><i class="fas fa-power-off"></i> MIDTRE</button>
+                    <button class="moon-btn" id="btnRight" title="Høyre knapp (lysstyrke, pluss i innstillinger)"><i class="fas fa-sun"></i> HØYRE</button>
                 </div>
-                <p style="margin-top: 5px; font-size:0.8rem;"><i class="fas fa-hand-pointer"></i> Klikk på knappene eller månen for å prøve</p>
+                <p class="sim-hint"><i class="fas fa-hand-pointer"></i> Prøv knappene. Hold MIDTRE i 1,5 sek for innstillinger.</p>
+                <div class="sim-clock">
+                    <span>Lampens klokke: <strong id="simClock">–</strong></span>
+                    <button type="button" id="jumpOrange">Hopp til oransje lys</button>
+                    <button type="button" id="jumpMorning">Hopp til grønt lys</button>
+                    <button type="button" id="resetClock">Nullstill klokka</button>
+                </div>
             </div>
         </div>
 
@@ -422,7 +445,8 @@
                         <i class="fas fa-chevron-right"></i> <span>💡 Display-symboler</span>
                     </div>
                     <div class="detail-content">
-                        <p>Punktum (<code>.</code>) lyser mellom timer og minutter, f.eks. <code>12.30</code>. Under innstillinger slukkes sifre som ikke er i bruk (f.eks. dag: <code> 5</code>).</p>
+                        <p>Displayet er mørkt til vanlig og lyser bare ved oppstart og i innstillingsmodus.</p>
+                        <p>Punktum (<code>.</code>) lyser mellom timer og minutter, f.eks. <code>12.30</code>. Under innstillinger slukkes sifre som ikke er i bruk (f.eks. dag: <code> 5</code>), og verdien du endrer blinker.</p>
                     </div>
                 </div>
             </div>
@@ -434,145 +458,487 @@
 
             <hr>
             <footer>
-                <p>✨ Klikk på månen eller knappene for å se farger og lys endre seg! ✨</p>
+                <p>✨ Simulatoren øverst oppfører seg som lampen – prøv knappene og innstillingsmenyen! ✨</p>
                 <p><i class="fas fa-heart" style="color:#ffab4f;"></i> Søte drømmer fra Månelampen</p>
             </footer>
         </div>
     </div>
 
     <script>
-        const moon = document.getElementById('moonSphere');
-        const dots = [document.getElementById('dot1'),document.getElementById('dot2'),document.getElementById('dot3'),document.getElementById('dot4'),document.getElementById('dot5')];
-        const display = document.getElementById('simDisplay');
+        // Simulator: a port of loop() in moonlamp.ino, so the page behaves like the lamp
 
-        let powerOn = true;
-        // 0=varmhvit, 1=kaldhvit, 2=fargehjul (ruller), 3=låst egendefinert farge
-        let colorState = 0;
-        let brightness = 3;              // 1-5
-        let customColorIndex = 0;         // for fargehjul (0-627)
-        let lockedColorIndex = 0;          // når man låser i state 3
+        // Segment patterns from moonlamp.ino (bit 0-6 = a-g, bit 7 = dp)
+        const PAT = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F,
+                     0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71, 0x3D, 0x76, 0x30, 0x1E,
+                     0x75, 0x38, 0x55, 0x54, 0x3F, 0x73, 0x6B, 0x50, 0x6D, 0x78,
+                     0x3E, 0x3E, 0x2A, 0x76, 0x6E, 0x5B];
+        const GAMMA8 = [
+            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,
+            1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2, 2,3,3,3,3,3,3,3,4,4,4,4,4,5,5,5,
+            5,6,6,6,6,7,7,7,7,8,8,8,9,9,9,10, 10,10,11,11,11,12,12,13,13,13,14,14,15,15,16,16,
+            17,17,18,18,19,19,20,20,21,21,22,22,23,24,24,25, 25,26,27,27,28,29,29,30,31,32,32,33,34,35,35,36,
+            37,38,39,39,40,41,42,43,44,45,46,47,48,49,50,50, 51,52,54,55,56,57,58,59,60,61,62,63,64,66,67,68,
+            69,70,72,73,74,75,77,78,79,81,82,83,85,86,87,89, 90,92,93,95,96,98,99,101,102,104,105,107,109,110,112,114,
+            115,117,119,120,122,124,126,127,129,131,133,135,137,138,140,142, 144,146,148,150,152,154,156,158,160,162,164,167,169,171,173,175,
+            177,180,182,184,186,189,191,193,196,198,200,203,205,208,210,213, 215,218,220,223,225,228,231,233,236,239,241,244,247,249,252,255];
 
-        // faktor for lysstyrke (1-5)
-        const brightnessFactor = [0.2, 0.4, 0.6, 0.8, 1.0];
+        const OFF = 0, ON = 1, ADJUSTING = 2;
+        const ORANGE_HOUR = 0, ORANGE_MINUTE = 1, MORNING_HOUR = 2, MORNING_MINUTE = 3,
+              YEAR = 4, MONTH = 5, DAY = 6, DOW = 7, TIME_HOUR = 8, TIME_MINUTE = 9;
+        const ENTER_ADJUSTMENT = 0, FLASH_NAME = 1, SHOW_VAL = 2, HIDE_VAL = 3;
+        const WARM_WHITE = 0, WHITE = 1, CUSTOM_SELECTION = 2, CUSTOM_SELECTED = 3, NUM_STATES = 4;
+        const NUM_LEDS = 14;
+        const LONG_PRESS_MS = 1500;
 
-        // base farger for varmhvit og kaldhvit (RGB)
-        const warmWhite = {r:255, g:225, b:180};
-        const coolWhite = {r:255, g:255, b:245};
-
-        function rainbowColorRGB(step) {
-            let r = Math.sin(step * 0.1) * 127 + 128;
-            let g = Math.sin(step * 0.1 + 2) * 127 + 128;
-            let b = Math.sin(step * 0.1 + 4) * 127 + 128;
-            return {r: Math.floor(r), g: Math.floor(g), b: Math.floor(b)};
+        // "EEPROM" and the RTC are kept in this browser only
+        const EEPROM_KEY = 'moonlamp-sim-eeprom';
+        const RTC_KEY = 'moonlamp-sim-rtc-offset';
+        const eeprom = { colorState: 0, customColor: 0, brightness: 3,
+                         orangeHour: 19, orangeMinute: 0, morningHour: 6, morningMinute: 30 };
+        try { Object.assign(eeprom, JSON.parse(localStorage.getItem(EEPROM_KEY)) || {}); } catch (e) {}
+        function eepromWrite(key, value) {
+            eeprom[key] = value;
+            try { localStorage.setItem(EEPROM_KEY, JSON.stringify(eeprom)); } catch (e) {}
         }
 
-        function applyBrightness(rgb, level) {
-            let factor = brightnessFactor[level-1];
-            return {
-                r: Math.floor(rgb.r * factor),
-                g: Math.floor(rgb.g * factor),
-                b: Math.floor(rgb.b * factor)
-            };
+        // The RTC is the browser clock plus an offset, set from the menu
+        let rtcOffset = 0;
+        try { rtcOffset = Number(localStorage.getItem(RTC_KEY)) || 0; } catch (e) {}
+        function saveRtcOffset() {
+            try { localStorage.setItem(RTC_KEY, String(rtcOffset)); } catch (e) {}
+        }
+        function getLocalTime() {
+            const d = new Date(Date.now() + rtcOffset);
+            return { year: d.getFullYear(), mon: d.getMonth(), mday: d.getDate(), wday: d.getDay(),
+                     hour: d.getHours(), min: d.getMinutes(), sec: d.getSeconds() };
+        }
+        function setLocalTime(t) {
+            const d = new Date(t.year, t.mon, t.mday, t.hour, t.min, t.sec);
+            rtcOffset = d.getTime() - Date.now();
+            saveRtcOffset();
+        }
+        function daysInMonth(year, month) {
+            return new Date(year, month + 1, 0).getDate();
         }
 
-        function updateMoon() {
-            if (!powerOn) {
-                moon.style.background = '#3a404b';
-                moon.style.boxShadow = '0 0 20px #5f5f5f, inset -10px -5px 15px #1e1e1e';
-                dots.forEach((d) => d.className = 'dot inactive');
+        const constrain = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+        function wrapAround(value, min, max) {
+            const range = max - min + 1;
+            return ((value - min) % range + range) % range + min;
+        }
+        const millis = () => performance.now();
+
+        // ---- Display ----
+        let dig = [0, 0, 0, 0], comma = 0, clearDig = 0xF;
+        function disp(digit, c = 0, charDis = 0) {
+            dig = [digit % 10, Math.floor(digit / 10) % 10, Math.floor(digit / 100) % 10, Math.floor(digit / 1000) % 10];
+            comma = c & 0x0F;
+            clearDig = charDis;
+        }
+        function charToIndex(ch) {
+            if (ch >= '0' && ch <= '9') return ch.charCodeAt(0) - 48;
+            if (ch >= 'a' && ch <= 'z') return ch.charCodeAt(0) - 97 + 10;
+            return 0;
+        }
+        function dispChar(text, c = 0, charDis = 0) {
+            for (let i = 0; i < 4; i++) {
+                dig[i] = i < text.length ? charToIndex(text[text.length - 1 - i]) : 0;
+            }
+            comma = c & 0x0F;
+            clearDig = charDis;
+        }
+
+        // ---- State (same names as the firmware) ----
+        let mainState = OFF;
+        let adjustmentState = ORANGE_HOUR;
+        let adjustmentSubstate = ENTER_ADJUSTMENT;
+        let colorState = constrain(eeprom.colorState, 0, 2);
+        let customColorWheelIndex = eeprom.customColor & 0xFF;
+        let brightness = constrain(eeprom.brightness, 1, 5);
+        let orangeHour = constrain(eeprom.orangeHour, 0, 23);
+        let orangeMinute = constrain(eeprom.orangeMinute, 0, 59);
+        let morningHour = constrain(eeprom.morningHour, 0, 23);
+        let morningMinute = constrain(eeprom.morningMinute, 0, 59);
+        let timeinfo = getLocalTime();
+
+        let update = true;
+        let lastRotationTime = 0;
+        let enteredAdjustment = 0;
+        let lastTimeSample = 0;
+        let adjustmentDiff = 0;
+        let autoOn = false;
+        let running = false;
+        const btn = [0, 0, 0];      // Left and right press counters
+        let middleEvent = null;     // 'short' or 'long'
+        let leds = new Array(NUM_LEDS).fill([0, 0, 0]);
+
+        function colorWheel(pos) {
+            pos = 255 - pos;
+            if (pos < 85) return [GAMMA8[255 - pos * 3], 0, GAMMA8[pos * 3]];
+            if (pos < 170) { pos -= 85; return [0, GAMMA8[pos * 3], GAMMA8[255 - pos * 3]]; }
+            pos -= 170;
+            return [GAMMA8[pos * 3], GAMMA8[255 - pos * 3], 0];
+        }
+        function brightnessAdjust(c) {
+            const pct = [10, 10, 20, 60, 100][brightness - 1] ?? 100;
+            return Math.floor((c * pct + 50) / 100);
+        }
+        function setColor() {
+            if (mainState !== ON) {
+                leds = new Array(NUM_LEDS).fill([0, 0, 0]);
                 return;
             }
-
-            // oppdater dots basert på brightness
-            dots.forEach((d, idx) => {
-                d.className = idx < brightness ? 'dot active' : 'dot inactive';
-            });
-
-            // finn base RGB basert på colorState
-            let baseRGB;
-            if (colorState === 0) {
-                baseRGB = warmWhite;
-            } else if (colorState === 1) {
-                baseRGB = coolWhite;
-            } else if (colorState === 2) {
-                baseRGB = rainbowColorRGB(customColorIndex);
-            } else { // state 3
-                baseRGB = rainbowColorRGB(lockedColorIndex);
-            }
-
-            // juster med lysstyrke
-            let finalRGB = applyBrightness(baseRGB, brightness);
-
-            let bgColor = `rgb(${finalRGB.r}, ${finalRGB.g}, ${finalRGB.b})`;
-            moon.style.background = bgColor;
-            moon.style.boxShadow = `0 0 40px ${bgColor}, 0 0 80px ${bgColor}, inset -10px -5px 15px rgba(0,0,0,0.2)`;
+            let rgb;
+            if (colorState === WARM_WHITE) rgb = [255, 120, 30];
+            else if (colorState === WHITE) rgb = [255, 255, 255];
+            else rgb = colorWheel(customColorWheelIndex);
+            const color = rgb.map(brightnessAdjust);
+            const pattern = brightness === 1 ? (1 << 0) | (1 << 3) | (1 << 7) | (1 << 10)
+                          : brightness === 2 ? 0x1555 : 0xFFFF;
+            leds = Array.from({ length: NUM_LEDS }, (_, i) => (pattern >> i) & 1 ? color : [0, 0, 0]);
         }
 
-        moon.addEventListener('click', () => {
-            powerOn = !powerOn;
-            updateMoon();
-            moon.style.transform = 'scale(0.95)';
-            setTimeout(() => moon.style.transform = '', 150);
-        });
+        // Middle button: short and long press, as in loop()
+        function handleMiddle(longPress) {
+            update = true;
+            autoOn = false;
+            if (longPress) {
+                if (mainState !== ADJUSTING) {
+                    adjustmentState = ORANGE_HOUR;
+                    adjustmentSubstate = ENTER_ADJUSTMENT;
+                    mainState = ADJUSTING;
+                    enteredAdjustment = millis();
+                } else {
+                    mainState = OFF;
+                }
+                return;
+            }
+            if (mainState === ADJUSTING) {
+                if (adjustmentState === ORANGE_HOUR) eepromWrite('orangeHour', orangeHour);
+                else if (adjustmentState === MORNING_HOUR) eepromWrite('morningHour', morningHour);
+                else if (adjustmentState === ORANGE_MINUTE) eepromWrite('orangeMinute', orangeMinute);
+                else if (adjustmentState === MORNING_MINUTE) eepromWrite('morningMinute', morningMinute);
+                else setLocalTime(timeinfo);
+            }
+            mainState = mainState === OFF ? ON
+                      : mainState === ON ? OFF
+                      : adjustmentState === TIME_MINUTE ? OFF
+                      : ADJUSTING;
+            if (adjustmentSubstate !== ENTER_ADJUSTMENT && adjustmentSubstate !== FLASH_NAME) {
+                adjustmentSubstate = FLASH_NAME;
+                adjustmentState++;
+            }
+        }
 
-        document.getElementById('btnLeft').addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!powerOn) powerOn = true;
+        function loop() {
+            if (!running) return;
+            const now = millis();
 
-            if (colorState === 0) {
-                colorState = 1;
-            } else if (colorState === 1) {
-                colorState = 2;
-                customColorIndex = (customColorIndex + 30) % 628;
-            } else if (colorState === 2) {
-                lockedColorIndex = customColorIndex;
-                colorState = 3;
-            } else { // state 3
-                colorState = 0;
+            if (mainState === ADJUSTING) {
+                const timeDiff = now - enteredAdjustment;
+                if (adjustmentSubstate === ENTER_ADJUSTMENT && timeDiff > 2000) {
+                    adjustmentSubstate = FLASH_NAME; enteredAdjustment = now;
+                } else if (adjustmentSubstate === FLASH_NAME && timeDiff > 2000) {
+                    adjustmentSubstate = SHOW_VAL; enteredAdjustment = now;
+                } else if (adjustmentSubstate === SHOW_VAL && timeDiff > 499) {
+                    adjustmentSubstate = HIDE_VAL; enteredAdjustment = now;
+                } else if (adjustmentSubstate === HIDE_VAL && timeDiff > 499) {
+                    adjustmentSubstate = SHOW_VAL; enteredAdjustment = now;
+                }
+            } else if (now - lastTimeSample > 100) {
+                timeinfo = getLocalTime();
+                lastTimeSample = now;
+                if (timeinfo.hour === orangeHour && timeinfo.min === orangeMinute) {
+                    mainState = ON; colorState = CUSTOM_SELECTED; customColorWheelIndex = 28;
+                    brightness = 1; update = true; autoOn = true;
+                }
+                if (timeinfo.hour === morningHour && timeinfo.min === morningMinute) {
+                    mainState = ON; colorState = CUSTOM_SELECTED; customColorWheelIndex = 85;
+                    brightness = 1; update = true; autoOn = true;
+                }
+                if (timeinfo.hour === morningHour + 1 && timeinfo.min === morningMinute && autoOn) {
+                    mainState = OFF; update = true; autoOn = false;
+                    customColorWheelIndex = eeprom.customColor & 0xFF;
+                    colorState = constrain(eeprom.colorState, 0, 3);
+                }
             }
 
-            updateMoon();
-            let btn = e.currentTarget;
-            btn.style.transform = 'translateY(6px)';
-            setTimeout(() => btn.style.transform = '', 120);
-        });
-
-        document.getElementById('btnRight').addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!powerOn) powerOn = true;
-            brightness = (brightness % 5) + 1; // 1->2,2->3,3->4,4->5,5->1
-            updateMoon();
-            let btn = e.currentTarget;
-            btn.style.transform = 'translateY(6px)';
-            setTimeout(() => btn.style.transform = '', 120);
-        });
-
-        document.getElementById('btnMid').addEventListener('click', (e) => {
-            e.stopPropagation();
-            powerOn = !powerOn;
-            updateMoon();
-            let btn = e.currentTarget;
-            btn.style.transform = 'translateY(6px)';
-            setTimeout(() => btn.style.transform = '', 120);
-        });
-
-        document.getElementById('btnMid').addEventListener('dblclick', (e) => {
-            e.stopPropagation();
-            alert('✨ Innstillingsmodus (simulert): Display viser "inst" og deretter "oran". I virkeligheten holder du knappen 1,5 sek.');
-            let originalHTML = display.innerHTML;
-            display.innerHTML = '<span>i</span><span>n</span><span class="dot-indicator">.</span><span>s</span><span>t</span>';
-            setTimeout(() => display.innerHTML = originalHTML, 1500);
-        });
-
-        // fargehjul-rulling kun i state 2
-        setInterval(() => {
-            if (powerOn && colorState === 2) {
-                customColorIndex = (customColorIndex + 1) % 628;
-                updateMoon();
+            if (middleEvent) {
+                handleMiddle(middleEvent === 'long');
+                middleEvent = null;
             }
-        }, 100);
+            if (btn[0]) {
+                if (mainState === ON) {
+                    if (colorState === CUSTOM_SELECTION) eepromWrite('customColor', customColorWheelIndex);
+                    colorState = (colorState + 1) % NUM_STATES;
+                    eepromWrite('colorState', colorState);
+                    update = true; lastRotationTime = 0;
+                } else if (mainState === ADJUSTING) {
+                    adjustmentDiff -= btn[0];
+                }
+                btn[0] = 0; autoOn = false;
+            }
+            if (btn[2]) {
+                if (mainState === ON) {
+                    brightness = brightness === 5 ? 1 : brightness + 1;
+                    eepromWrite('brightness', brightness);
+                    update = true;
+                } else if (mainState === ADJUSTING) {
+                    adjustmentDiff += btn[2];
+                }
+                btn[2] = 0; autoOn = false;
+            }
 
-        updateMoon();
+            const rotateColor = (now - lastRotationTime) > 64 && colorState === CUSTOM_SELECTION;
+            if (rotateColor) {
+                customColorWheelIndex = (customColorWheelIndex + 1) & 0xFF;
+                lastRotationTime = now;
+            }
+            if (update || rotateColor) {
+                setColor();
+                update = false;
+            }
+
+            if (mainState === ADJUSTING) {
+                updateAdjustmentDisplay();
+                adjustmentDiff = 0;
+            } else {
+                disp(0, 0, 0xF);
+            }
+            render();
+        }
+
+        function updateAdjustmentDisplay() {
+            if (adjustmentSubstate === ENTER_ADJUSTMENT) {
+                dispChar('inst');
+                return;
+            }
+            if (adjustmentSubstate === FLASH_NAME) {
+                switch (adjustmentState) {
+                    case ORANGE_MINUTE: case ORANGE_HOUR: dispChar('oran'); break;
+                    case MORNING_MINUTE: case MORNING_HOUR: dispChar('morn'); break;
+                    case YEAR: dispChar('year'); break;
+                    case MONTH: dispChar('mnth'); break;
+                    case DAY: dispChar('dday', 0, 0b1000); break;
+                    case DOW: dispChar('ddow', 0, 0b1000); break;
+                    case TIME_MINUTE: case TIME_HOUR: dispChar('cclk', 0, 0b1000); break;
+                }
+                return;
+            }
+            let hide = 0b1111, show = 0, commaEnable = 0b0100, value = 0;
+            const d = adjustmentDiff;
+            switch (adjustmentState) {
+                case ORANGE_HOUR:
+                    hide = 0b1100; orangeHour = wrapAround(orangeHour + d, 0, 23);
+                    value = orangeHour * 100 + orangeMinute; break;
+                case MORNING_HOUR:
+                    hide = 0b1100; morningHour = wrapAround(morningHour + d, 0, 23);
+                    value = morningHour * 100 + morningMinute; break;
+                case TIME_HOUR:
+                    hide = 0b1100; timeinfo.hour = wrapAround(timeinfo.hour + d, 0, 23);
+                    value = timeinfo.hour * 100 + timeinfo.min; break;
+                case ORANGE_MINUTE:
+                    hide = 0b0011; orangeMinute = wrapAround(orangeMinute + d, 0, 59);
+                    value = orangeHour * 100 + orangeMinute; break;
+                case MORNING_MINUTE:
+                    hide = 0b0011; morningMinute = wrapAround(morningMinute + d, 0, 59);
+                    value = morningHour * 100 + morningMinute; break;
+                case TIME_MINUTE:
+                    hide = 0b0011; timeinfo.min = wrapAround(timeinfo.min + d, 0, 59);
+                    value = timeinfo.hour * 100 + timeinfo.min; break;
+                case DAY:
+                    show = 0b1100; commaEnable = 0;
+                    timeinfo.mday = wrapAround(timeinfo.mday + d, 1, daysInMonth(timeinfo.year, timeinfo.mon));
+                    value = timeinfo.mday; break;
+                case MONTH:
+                    show = 0b1100; commaEnable = 0;
+                    timeinfo.mon = wrapAround(timeinfo.mon + d, 0, 11);
+                    value = timeinfo.mon + 1; break;
+                case YEAR:
+                    commaEnable = 0; timeinfo.year += d;
+                    value = timeinfo.year; break;
+                case DOW:
+                    show = 0b1110; commaEnable = 0;
+                    timeinfo.wday = wrapAround(timeinfo.wday + d, 1, 7);
+                    value = timeinfo.wday; break;
+            }
+            disp(value, commaEnable, adjustmentSubstate === SHOW_VAL ? show : hide);
+        }
+
+        // ---- Rendering ----
+        const SEGMENTS = [
+            '14,4 46,4 51,9 46,14 14,14 9,9',       // a
+            '52,11 57,16 57,44 52,49 47,44 47,16',  // b
+            '52,51 57,56 57,84 52,89 47,84 47,56',  // c
+            '14,86 46,86 51,91 46,96 14,96 9,91',   // d
+            '8,51 13,56 13,84 8,89 3,84 3,56',      // e
+            '8,11 13,16 13,44 8,49 3,44 3,16',      // f
+            '14,45 46,45 51,50 46,55 14,55 9,50'    // g
+        ];
+        const segDisplay = document.getElementById('segDisplay');
+        const digitSegs = [];
+        for (let i = 0; i < 4; i++) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 70 100');
+            svg.setAttribute('aria-hidden', 'true');
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', 'skewX(-6) translate(8 0)');
+            const segs = SEGMENTS.map(points => {
+                const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                p.setAttribute('points', points);
+                p.setAttribute('class', 'seg');
+                g.appendChild(p);
+                return p;
+            });
+            const dp = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dp.setAttribute('cx', '62'); dp.setAttribute('cy', '92'); dp.setAttribute('r', '5');
+            dp.setAttribute('class', 'seg');
+            g.appendChild(dp);
+            segs.push(dp);
+            svg.appendChild(g);
+            segDisplay.appendChild(svg);
+            digitSegs.push(segs);
+        }
+
+        const ledDots = document.getElementById('ledDots');
+        const dotEls = Array.from({ length: NUM_LEDS }, () => {
+            const d = document.createElement('span');
+            d.className = 'dot';
+            ledDots.appendChild(d);
+            return d;
+        });
+        const moon = document.getElementById('moonSphere');
+        const simClock = document.getElementById('simClock');
+        const WEEKDAYS = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør'];
+        const pad = n => String(n).padStart(2, '0');
+
+        function render() {
+            // Leftmost digit on the display is dig[3]
+            for (let pos = 0; pos < 4; pos++) {
+                const i = 3 - pos;
+                let p = PAT[dig[i]] ?? 0;
+                if (clearDig & (1 << i)) p = 0;
+                if (comma & (1 << i)) p |= 0x80;
+                digitSegs[pos].forEach((seg, bit) => seg.classList.toggle('on', !!(p & (1 << bit))));
+            }
+
+            // Show the LED colours at full saturation and use the level for intensity
+            const level = [0.35, 0.5, 0.62, 0.82, 1][brightness - 1] ?? 1;
+            let lit = null;
+            leds.forEach((c, i) => {
+                const max = Math.max(...c);
+                if (max === 0) {
+                    dotEls[i].style.background = '';
+                    dotEls[i].style.opacity = '';
+                    dotEls[i].style.boxShadow = '';
+                    return;
+                }
+                const rgb = c.map(v => Math.round(v / max * 255));
+                lit = rgb;
+                dotEls[i].style.background = `rgb(${rgb})`;
+                dotEls[i].style.opacity = 0.4 + 0.6 * level;
+                dotEls[i].style.boxShadow = `0 0 ${4 + 8 * level}px rgb(${rgb})`;
+            });
+            if (lit) {
+                const dark = [58, 64, 75];
+                const light = lit.map(v => v * 0.8 + 255 * 0.2);
+                const mix = dark.map((v, k) => Math.round(v * (1 - level) + light[k] * level));
+                moon.style.background = `rgb(${mix})`;
+                moon.style.boxShadow = `0 0 ${40 * level}px rgb(${lit}), 0 0 ${90 * level}px rgba(${lit},${level * 0.7}), inset -10px -5px 15px rgba(0,0,0,0.2)`;
+            } else {
+                moon.style.background = '#3a404b';
+                moon.style.boxShadow = '0 0 20px #5f5f5f, inset -10px -5px 15px #1e1e1e';
+            }
+
+            const t = getLocalTime();
+            simClock.textContent = `${WEEKDAYS[t.wday]} ${t.mday}.${t.mon + 1}.${t.year} ${pad(t.hour)}:${pad(t.min)}:${pad(t.sec)}`;
+        }
+
+        // ---- Buttons ----
+        function pressFeedback(el, down) { el.classList.toggle('pressed', down); }
+
+        function bindSimpleButton(id, index) {
+            const el = document.getElementById(id);
+            el.addEventListener('pointerdown', e => {
+                e.preventDefault();
+                btn[index]++;
+                pressFeedback(el, true);
+            });
+            ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev =>
+                el.addEventListener(ev, () => pressFeedback(el, false)));
+            el.addEventListener('keydown', e => {
+                if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+                    e.preventDefault();
+                    btn[index]++;
+                }
+            });
+            el.addEventListener('contextmenu', e => e.preventDefault());
+        }
+        bindSimpleButton('btnLeft', 0);
+        bindSimpleButton('btnRight', 2);
+
+        // Middle button: a long press fires after 1.5 s while held, a short press on release
+        const btnMid = document.getElementById('btnMid');
+        let middleTimer = null;
+        function middleDown() {
+            if (middleTimer) return;
+            pressFeedback(btnMid, true);
+            middleTimer = setTimeout(() => {
+                middleTimer = 'done';
+                middleEvent = 'long';
+            }, LONG_PRESS_MS);
+        }
+        function middleUp() {
+            pressFeedback(btnMid, false);
+            if (middleTimer && middleTimer !== 'done') {
+                clearTimeout(middleTimer);
+                middleEvent = 'short';
+            }
+            middleTimer = null;
+        }
+        btnMid.addEventListener('pointerdown', e => { e.preventDefault(); middleDown(); });
+        btnMid.addEventListener('pointerup', middleUp);
+        btnMid.addEventListener('pointerleave', () => { if (middleTimer) middleUp(); });
+        btnMid.addEventListener('pointercancel', () => { if (middleTimer) middleUp(); });
+        btnMid.addEventListener('keydown', e => {
+            if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); middleDown(); }
+        });
+        btnMid.addEventListener('keyup', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); middleUp(); }
+        });
+        btnMid.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Clock helpers: jump to a few seconds before an alarm
+        function jumpTo(hour, minute) {
+            const target = new Date(Date.now() + rtcOffset);
+            target.setHours(hour, minute, 0, 0);
+            rtcOffset = target.getTime() - 5000 - Date.now();
+            saveRtcOffset();
+        }
+        document.getElementById('jumpOrange').addEventListener('click', () => jumpTo(orangeHour, orangeMinute));
+        document.getElementById('jumpMorning').addEventListener('click', () => jumpTo(morningHour, morningMinute));
+        document.getElementById('resetClock').addEventListener('click', () => { rtcOffset = 0; saveRtcOffset(); });
+
+        // Startup as in setup(): show the year and the time, then clear the display
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        async function startup() {
+            timeinfo = getLocalTime();
+            const steps = [
+                [() => dispChar('year'), 500],
+                [() => disp(timeinfo.year), 1000],
+                [() => dispChar('time'), 500],
+                [() => disp(timeinfo.hour * 100 + timeinfo.min), 1000]
+            ];
+            for (const [show, ms] of steps) {
+                show();
+                render();
+                await sleep(ms);
+            }
+            disp(0, 0, 0xF);
+            running = true;
+        }
+        startup();
+        setInterval(loop, 10);
 
         function toggleDetail(header) {
             const content = header.nextElementSibling;
@@ -586,12 +952,5 @@
             }
         }
     </script>
-    <style>
-        .sim-display span { width: 28px; display: inline-block; text-align: center; font-weight: 600; }
-        .dot-indicator { width: auto !important; margin: 0 2px; }
-        @media (max-width: 700px) {
-            .sim-display span { width: 22px; }
-        }
-    </style>
 </body>
 </html>
