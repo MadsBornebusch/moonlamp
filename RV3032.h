@@ -21,15 +21,20 @@ public:
     
     // Get time to tm structure
     bool getTime(tm &time);
-    
-    // Adjust time for Norwegian daylight saving
-    bool adjustNorwegianDST(tm &time);
-    
+
+    // Get/set Norwegian local time. The RTC always runs on standard time (CET),
+    // summer time (CEST) is added when reading and removed when writing.
+    bool getLocalTime(tm &time);
+    bool setLocalTime(const tm &time);
+
     // Read temperature in Celsius
     float readTemperature();
-    
-    // Check if it's DST in Norway at the given time
-    static bool isDSTNorway(const tm &time);
+
+    // Check if it's DST in Norway at the given standard time (CET)
+    static bool isDSTNorway(const tm &standardTime);
+
+    // Days in month (0-11) of the given year
+    static uint8_t daysInMonth(int year, uint8_t month);
     
     // Get current RTC status
     uint8_t getStatus();
@@ -47,7 +52,9 @@ private:
     // Helper functions
     uint8_t bcdToDec(uint8_t bcd);
     uint8_t decToBcd(uint8_t dec);
-    
+    static uint8_t dayOfWeek(int year, uint8_t month, uint8_t day);
+    static void shiftHour(tm &time, int8_t dir);
+
     // Configuration functions
     bool disableEVI();
     bool writeModify(uint8_t address, uint8_t data, uint8_t mask);

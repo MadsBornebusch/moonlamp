@@ -88,10 +88,29 @@ const uint8_t PROGMEM gamma8[] = {
 
 
 // Button handling variables
-#define DEBOUNCE_MS 50
-volatile uint8_t btn[3] = {0};
-volatile uint8_t btn_state[3] = {0xFF};
-volatile uint32_t t0=0, t1=0, t2=0;
+// The buttons have no debounce capacitors, so they are sampled in the display
+// interrupt (every 2 ms) and must read the same for DEBOUNCE_SAMPLES in a row
+#define DEBOUNCE_SAMPLES 20  // 40 ms
+const uint8_t btn_pin[3] = {PD1, PD3, PD0};
+volatile uint8_t btn[3] = {0};       // Press counters, cleared by the main loop
+volatile uint8_t btn_down[3] = {0};  // Debounced state, 1 while held
+uint8_t btn_count[3] = {0};
+
+// Button debouncing, called from the display interrupt
+// A press is counted once the button has been stable down for DEBOUNCE_SAMPLES
+static inline void debounceButtons() {
+  uint8_t pins = PIND;
+  for (uint8_t i = 0; i < 3; i++) {
+    uint8_t pressed = !(pins & (1 << btn_pin[i]));
+    if (pressed == btn_down[i]) {
+      btn_count[i] = 0;
+    } else if (++btn_count[i] >= DEBOUNCE_SAMPLES) {
+      btn_count[i] = 0;
+      btn_down[i] = pressed;
+      if (pressed) ++btn[i];
+    }
+  }
+}
 
 // Display function - shows a 4-digit number with comma control and character disable functionality
 void disp(uint16_t digit, uint8_t c = 0, uint8_t charDis = 0) {
@@ -159,41 +178,13 @@ ISR(TIMER1_COMPA_vect) {
   }
   PORTC|= (1<<curDigit);  // Digit on
   curDigit=(curDigit+1)&3;
-}
 
-
-// Button interrupt handlers
-// Single ISR for PCINT2 (handles both PCINT16 and PCINT17)
-ISR(PCINT2_vect) {
-  uint32_t now = millis();
-  uint8_t current_state_0 = (PIND & (1<<1)) ? 1 : 0;
-  // If state changed from HIGH to LOW (falling edge) and debounced
-  if ((current_state_0 == 0) && (btn_state[0] == 1) && (now - t0 > DEBOUNCE_MS)) {
-    ++btn[0];
-    t0 = now;
-  }
-  btn_state[0] = current_state_0;
-    uint8_t current_state_2 = (PIND & (1<<0)) ? 1 : 0;
-  // If state changed from HIGH to LOW (falling edge) and debounced
-  if ((current_state_2 == 0) && (btn_state[2] == 1) && (now - t2 > DEBOUNCE_MS)) {
-    ++btn[2];
-    t2 = now;
-  }
-  btn_state[2] = current_state_2;
-}
-
-// INT1 ISR for button 1
-ISR(INT1_vect) { 
-  uint32_t now = millis();
-  if (now - t1 > DEBOUNCE_MS) { btn[1]++; t1=now; }
+  debounceButtons();
 }
 
 void enableButtonInterrupts () {
   DDRD &= ~0x0B;        // PD0,1,3 as inputs
-  EICRA = (1<<ISC11);   // INT1 falling edge
-  EIMSK = (1<<INT1);    // Enable INT1
-  PCICR = (1<<PCIE2);   // Enable PCINT2
-  PCMSK2 = 0x03;        // PCINT16 & PCINT17
+  PORTD |= 0x0B;        // Internal pull-ups
   sei();                // Enable interrupts
 }
 
@@ -299,7 +290,7 @@ void setup() {
   leds.show();
 
   rtc.begin();
-  rtc.getTime(timeinfo);
+  rtc.getLocalTime(timeinfo);
   // Initial display test, show year
   dispChar("year");
   delay(500);
@@ -402,7 +393,7 @@ void loop() {
       entered_adjustment = iteration_millis;
     }
   } else if ((iteration_millis - last_time_sample) > 100) {
-    rtc.getTime(timeinfo);
+    rtc.getLocalTime(timeinfo);
     last_time_sample = iteration_millis;
     if(timeinfo.tm_hour == orange_hour && timeinfo.tm_min == orange_minute) {
       main_state = ON;
@@ -435,7 +426,7 @@ void loop() {
 
   if(btn[1]) {
     btn[1] = 0, update = 1, auto_on = 0; 
-    while(bit_is_set(PIND, PD3) == 0 && (millis() - iteration_millis) <= 1500)
+    while(btn_down[1] && (millis() - iteration_millis) <= 1500)
     {
     }
     long_press = (millis() - iteration_millis) > 1500;
@@ -460,7 +451,9 @@ void loop() {
         } else if (adjustment_state == MORNING_MINUTE) {
           EEPROM.write(MORNING_MINUTE_EEPROM, morning_minute);
         } else {
-          rtc.setTime(timeinfo);
+          // The user sets local time (summer time in summer), the RTC is kept
+          // on standard time
+          rtc.setLocalTime(timeinfo);
         }
       }
 
@@ -584,17 +577,16 @@ void loop() {
           charDisableHide = 0b1111;
           charDisableShow = 0b1100;
           commaEnable = 0;
-          int16_t daysInMonth = (timeinfo.tm_mon == 1) ? (28 + (timeinfo.tm_year % 4 == 0)) :
-                                (timeinfo.tm_mon == 3 || timeinfo.tm_mon == 5 ||
-                                 timeinfo.tm_mon == 8 || timeinfo.tm_mon == 10) ? 30 : 31;
+          int16_t daysInMonth = RV3032::daysInMonth(timeinfo.tm_year + 1900, timeinfo.tm_mon);
           timeinfo.tm_mday = wrapAround(timeinfo.tm_mday + adjustment_diff, 1, daysInMonth);
           value = timeinfo.tm_mday;
       } else if (adjustment_state == MONTH) {
           charDisableHide = 0b1111;
           charDisableShow = 0b1100;
           commaEnable = 0;
-          timeinfo.tm_mon = wrapAround(timeinfo.tm_mon + adjustment_diff, 1, 12);
-          value = timeinfo.tm_mon;
+          // tm_mon is 0-11, shown as 1-12
+          timeinfo.tm_mon = wrapAround(timeinfo.tm_mon + adjustment_diff, 0, 11);
+          value = timeinfo.tm_mon + 1;
       } else if (adjustment_state == YEAR) {
           charDisableHide = 0b1111;
           charDisableShow = 0;

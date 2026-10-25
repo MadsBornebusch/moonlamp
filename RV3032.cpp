@@ -105,84 +105,93 @@ bool RV3032::getTime(tm &time) {
     return true;
 }
 
-// Adjust time for Norwegian daylight saving
-bool RV3032::adjustNorwegianDST(tm &time) {
-    // Check if we need to adjust for DST
-    bool isDST = isDSTNorway(time);
-    
-    // Read current time from RTC
-    tm currentTime = readRTCTime();
-    
-    // Check if current time matches the expected DST state
-    bool currentIsDST = isDSTNorway(currentTime);
-    
-    // If DST state has changed, adjust the time
-    if (isDST != currentIsDST) {
-        if (isDST) {
-            // Spring forward: add 1 hour
-            currentTime.tm_hour += 1;
-            if (currentTime.tm_hour >= 24) {
-                currentTime.tm_hour -= 24;
-                currentTime.tm_mday += 1;
-            }
-        } else {
-            // Fall back: subtract 1 hour
-            if (currentTime.tm_hour == 0) {
-                currentTime.tm_hour = 23;
-                currentTime.tm_mday -= 1;
-            } else {
-                currentTime.tm_hour -= 1;
-            }
-        }
-        
-        // Write adjusted time back to RTC
-        return writeRTCTime(currentTime);
+// Get Norwegian local time (CEST in summer, CET in winter)
+bool RV3032::getLocalTime(tm &time) {
+    time = readRTCTime();
+    time.tm_isdst = isDSTNorway(time);
+    if (time.tm_isdst) {
+        shiftHour(time, 1);
     }
-    
     return true;
 }
 
-// Check if it's DST in Norway at the given time
-bool RV3032::isDSTNorway(const tm &time) {
-    int year = time.tm_year + 1900;
-    int month = time.tm_mon + 1;
-    int day = time.tm_mday;
-    int hour = time.tm_hour;
+// Set the RTC from Norwegian local time, storing it as standard time
+bool RV3032::setLocalTime(const tm &time) {
+    // In summer the local time is one hour ahead of standard time. Use that if
+    // the resulting standard time is in the DST period, otherwise the local
+    // time already is standard time. In the repeated hour in October
+    // (02:00-02:59) this picks the first, summer time, occurrence.
+    tm standardTime = time;
+    shiftHour(standardTime, -1);
+    if (!isDSTNorway(standardTime)) {
+        standardTime = time;
+    }
+    return writeRTCTime(standardTime);
+}
+
+// Check if it's DST in Norway at the given standard time (CET). DST runs from
+// the last Sunday in March to the last Sunday in October and switches at
+// 01:00 UTC, which is 02:00 CET at both ends.
+bool RV3032::isDSTNorway(const tm &standardTime) {
+    int year = standardTime.tm_year + 1900;
+    uint8_t month = standardTime.tm_mon + 1;
     
-    // Find last Sunday in March
-    tm lastMar = {0};
-    lastMar.tm_year = year - 1900;
-    lastMar.tm_mon = 2;
-    lastMar.tm_mday = 31;
-    mktime(&lastMar);
-    int lastSundayMar = lastMar.tm_mday - lastMar.tm_wday;
-    
-    // Find last Sunday in October
-    tm lastOct = {0};
-    lastOct.tm_year = year - 1900;
-    lastOct.tm_mon = 9;
-    lastOct.tm_mday = 31;
-    mktime(&lastOct);
-    int lastSundayOct = lastOct.tm_mday - lastOct.tm_wday;
-    
-    // Check if current date is in DST period
+    if (month < 3 || month > 10) {
+        return false;
+    }
     if (month > 3 && month < 10) {
         return true;
-    } else if (month == 3) {
-        if (day > lastSundayMar) {
-            return true;
-        } else if (day == lastSundayMar && hour >= 1) {
-            return true;
-        }
-    } else if (month == 10) {
-        if (day < lastSundayOct) {
-            return true;
-        } else if (day == lastSundayOct && hour < 1) {
-            return true;
-        }
     }
     
-    return false;
+    // March and October both have 31 days
+    uint8_t lastSunday = 31 - dayOfWeek(year, month, 31);
+    bool afterSwitch = standardTime.tm_mday > lastSunday ||
+                       (standardTime.tm_mday == lastSunday && standardTime.tm_hour >= 2);
+    return (month == 3) ? afterSwitch : !afterSwitch;
+}
+
+// Days in month (0-11) of the given year
+uint8_t RV3032::daysInMonth(int year, uint8_t month) {
+    if (month == 1) {
+        bool leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+        return leap ? 29 : 28;
+    }
+    return (month == 3 || month == 5 || month == 8 || month == 10) ? 30 : 31;
+}
+
+// Day of week for a date (month 1-12), 0 = Sunday (Sakamoto's method)
+uint8_t RV3032::dayOfWeek(int year, uint8_t month, uint8_t day) {
+    static const uint8_t offset[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+    if (month < 3) {
+        year -= 1;
+    }
+    return (year + year / 4 - year / 100 + year / 400 + offset[month - 1] + day) % 7;
+}
+
+// Move the time one hour forward (dir = 1) or back (dir = -1), rolling the date
+void RV3032::shiftHour(tm &time, int8_t dir) {
+    time.tm_hour += dir;
+    if (time.tm_hour > 23) {
+        time.tm_hour = 0;
+        time.tm_wday = (time.tm_wday + 1) % 7;
+        if (++time.tm_mday > daysInMonth(time.tm_year + 1900, time.tm_mon)) {
+            time.tm_mday = 1;
+            if (++time.tm_mon > 11) {
+                time.tm_mon = 0;
+                time.tm_year++;
+            }
+        }
+    } else if (time.tm_hour < 0) {
+        time.tm_hour = 23;
+        time.tm_wday = (time.tm_wday + 6) % 7;
+        if (--time.tm_mday < 1) {
+            if (--time.tm_mon < 0) {
+                time.tm_mon = 11;
+                time.tm_year--;
+            }
+            time.tm_mday = daysInMonth(time.tm_year + 1900, time.tm_mon);
+        }
+    }
 }
 
 // Read temperature in Celsius
