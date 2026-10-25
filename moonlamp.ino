@@ -235,7 +235,6 @@ enum adjustment_state_t {
   YEAR,
   MONTH,
   DAY,
-  DOW,
   TIME_HOUR,
   TIME_MINUTE
 };
@@ -373,6 +372,35 @@ bool long_press = 0;
 uint32_t last_time_sample = 0;
 int8_t adjustment_diff = 0;
 bool auto_on = 0;
+uint16_t last_alarm_check = 0xFFFF;  // Minute of the day the alarms were last checked
+bool time_changed = 0;               // Date or time edited in the menu
+
+void checkAlarms() {
+  if(timeinfo.tm_hour == orange_hour && timeinfo.tm_min == orange_minute) {
+    main_state = ON;
+    color_state = CUSTOM_SELECTED;
+    custom_color_wheel_index = 28; // A very orange color
+    brightness = 1;
+    update = 1;
+    auto_on = 1;
+  }
+  if(timeinfo.tm_hour == morning_hour && timeinfo.tm_min == morning_minute) {
+    main_state = ON;
+    color_state = CUSTOM_SELECTED;
+    custom_color_wheel_index = 85; // Greeeen
+    brightness = 1;
+    update = 1;
+    auto_on = 1;
+  }
+  if(timeinfo.tm_hour == (morning_hour + 1) && timeinfo.tm_min == morning_minute && auto_on) {
+    main_state = OFF;
+    update = 1;
+    auto_on = 0;
+    custom_color_wheel_index = EEPROM.read(CUSTOM_COLOR_EEPROM);
+    color_state = constrain(EEPROM.read(COLOR_STATE_EEPROM),0,3);
+  }
+}
+
 void loop() {
   iteration_millis = millis();
 
@@ -393,30 +421,15 @@ void loop() {
       entered_adjustment = iteration_millis;
     }
   } else if ((iteration_millis - last_time_sample) > 100) {
-    rtc.getLocalTime(timeinfo);
     last_time_sample = iteration_millis;
-    if(timeinfo.tm_hour == orange_hour && timeinfo.tm_min == orange_minute) {
-      main_state = ON;
-      color_state = CUSTOM_SELECTED;
-      custom_color_wheel_index = 28; // A very orange color
-      brightness = 1;
-      update = 1;
-      auto_on = 1;
-    }
-    if(timeinfo.tm_hour == morning_hour && timeinfo.tm_min == morning_minute) {
-      main_state = ON;
-      color_state = CUSTOM_SELECTED;
-      custom_color_wheel_index = 85; // Greeeen
-      brightness = 1;
-      update = 1;
-      auto_on = 1;
-    }
-    if(timeinfo.tm_hour == (morning_hour + 1) && timeinfo.tm_min == morning_minute && auto_on) {
-      main_state = OFF;
-      update = 1;
-      auto_on = 0;
-      custom_color_wheel_index = EEPROM.read(CUSTOM_COLOR_EEPROM);
-      color_state = constrain(EEPROM.read(COLOR_STATE_EEPROM),0,3);
+    // Check the alarms once per minute, so turning the lamp off during the
+    // alarm minute sticks. Skip the check if the RTC can't be read.
+    if(rtc.getLocalTime(timeinfo)) {
+      uint16_t minute_of_day = timeinfo.tm_hour * 60 + timeinfo.tm_min;
+      if(minute_of_day != last_alarm_check) {
+        last_alarm_check = minute_of_day;
+        checkAlarms();
+      }
     }
   }
 
@@ -450,9 +463,11 @@ void loop() {
           EEPROM.write(ORANGE_MINUTE_EEPROM, orange_minute);
         } else if (adjustment_state == MORNING_MINUTE) {
           EEPROM.write(MORNING_MINUTE_EEPROM, morning_minute);
-        } else {
-          // The user sets local time (summer time in summer), the RTC is kept
-          // on standard time
+        } else if (adjustment_state == TIME_MINUTE && time_changed) {
+          // The date and time are written once, after the last field. The
+          // user sets local time (summer time in summer), the RTC is kept on
+          // standard time.
+          timeinfo.tm_sec = 0;
           rtc.setLocalTime(timeinfo);
         }
       }
@@ -464,6 +479,11 @@ void loop() {
       if(adjustment_substate != ENTER_ADJUSTMENT && adjustment_substate != FLASH_NAME) {
         adjustment_substate = FLASH_NAME;
         adjustment_state = static_cast<adjustment_state_t>(static_cast<int>(adjustment_state) + 1);
+        if (adjustment_state == YEAR) {
+          // Start the date and time fields from the current time
+          rtc.getLocalTime(timeinfo);
+          time_changed = 0;
+        }
       }
     }
   }
@@ -523,9 +543,6 @@ void loop() {
         case DAY:
           dispChar("dday", 0, 0b1000);
           break;
-        case DOW:
-          dispChar("ddow", 0, 0b1000);
-          break;
         case TIME_MINUTE:
         case TIME_HOUR:
           dispChar("cclk", 0, 0b1000);
@@ -536,6 +553,9 @@ void loop() {
       uint8_t charDisableShow;
       uint8_t commaEnable;
       uint16_t value;
+      if (adjustment_diff != 0 && adjustment_state >= YEAR) {
+        time_changed = 1;
+      }
 
       if (adjustment_state == ORANGE_HOUR) {
           charDisableHide = 0b1100;
@@ -577,8 +597,10 @@ void loop() {
           charDisableHide = 0b1111;
           charDisableShow = 0b1100;
           commaEnable = 0;
+          // Clamp the day first in case the month or year was changed, e.g.
+          // from 31 January to April
           int16_t daysInMonth = RV3032::daysInMonth(timeinfo.tm_year + 1900, timeinfo.tm_mon);
-          timeinfo.tm_mday = wrapAround(timeinfo.tm_mday + adjustment_diff, 1, daysInMonth);
+          timeinfo.tm_mday = wrapAround(min(timeinfo.tm_mday, daysInMonth) + adjustment_diff, 1, daysInMonth);
           value = timeinfo.tm_mday;
       } else if (adjustment_state == MONTH) {
           charDisableHide = 0b1111;
@@ -591,14 +613,9 @@ void loop() {
           charDisableHide = 0b1111;
           charDisableShow = 0;
           commaEnable = 0;
-          timeinfo.tm_year += adjustment_diff;
+          // The RTC stores years 2000-2099
+          timeinfo.tm_year = constrain(timeinfo.tm_year + adjustment_diff, 100, 199);
           value = (timeinfo.tm_year + 1900);
-      } else if (adjustment_state == DOW) {
-          charDisableHide = 0b1111;
-          charDisableShow = 0b1110;
-          commaEnable = 0;
-          timeinfo.tm_wday = wrapAround(timeinfo.tm_wday + adjustment_diff, 1, 7);
-          value = timeinfo.tm_wday;
       } else {
           charDisableHide = 0b1111;
           charDisableShow = 0;

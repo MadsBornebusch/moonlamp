@@ -433,11 +433,10 @@
                             <li><code>year</code> – år (4 siffer)</li>
                             <li><code>mnth</code> – måned (1–12)</li>
                             <li><code>day</code> – dag (venstre to slukket) f.eks. <code> 5</code></li>
-                            <li><code>dow</code> – ukedag (1 mandag–7 søndag) vist helt til høyre</li>
                             <li><code>clk</code> – nåværende klokkeslett (time, minutt)</li>
                         </ul>
                         <p><strong>Sommer-/vintertid:</strong> Still inn klokka slik den er nå (sommertid om sommeren). Lampen bytter automatisk mellom sommer- og vintertid.</p>
-                        <p><strong>Avslutt:</strong> Etter siste minutt-innstilling, trykk MIDTRE kort – lampen slår seg av. <br>Hold MIDTRE inne 1,5 sek for å avslutte uten lagring.</p>
+                        <p><strong>Avslutt:</strong> Etter siste minutt-innstilling, trykk MIDTRE kort – lampen slår seg av og klokka lagres (sekundene settes til 0). Klokka endres bare hvis du har endret dato eller tid. <br>Hold MIDTRE inne 1,5 sek for å avslutte uten å lagre dato og tid.</p>
                     </div>
                 </div>
                 <div class="detail-item">
@@ -484,7 +483,7 @@
 
         const OFF = 0, ON = 1, ADJUSTING = 2;
         const ORANGE_HOUR = 0, ORANGE_MINUTE = 1, MORNING_HOUR = 2, MORNING_MINUTE = 3,
-              YEAR = 4, MONTH = 5, DAY = 6, DOW = 7, TIME_HOUR = 8, TIME_MINUTE = 9;
+              YEAR = 4, MONTH = 5, DAY = 6, TIME_HOUR = 7, TIME_MINUTE = 8;
         const ENTER_ADJUSTMENT = 0, FLASH_NAME = 1, SHOW_VAL = 2, HIDE_VAL = 3;
         const WARM_WHITE = 0, WHITE = 1, CUSTOM_SELECTION = 2, CUSTOM_SELECTED = 3, NUM_STATES = 4;
         const NUM_LEDS = 14;
@@ -567,6 +566,8 @@
         let lastTimeSample = 0;
         let adjustmentDiff = 0;
         let autoOn = false;
+        let lastAlarmCheck = -1;    // Minute of the day the alarms were last checked
+        let timeChanged = false;    // Date or time edited in the menu
         let running = false;
         const btn = [0, 0, 0];      // Left and right press counters
         let middleEvent = null;     // 'short' or 'long'
@@ -618,7 +619,11 @@
                 else if (adjustmentState === MORNING_HOUR) eepromWrite('morningHour', morningHour);
                 else if (adjustmentState === ORANGE_MINUTE) eepromWrite('orangeMinute', orangeMinute);
                 else if (adjustmentState === MORNING_MINUTE) eepromWrite('morningMinute', morningMinute);
-                else setLocalTime(timeinfo);
+                else if (adjustmentState === TIME_MINUTE && timeChanged) {
+                    // The date and time are written once, after the last field
+                    timeinfo.sec = 0;
+                    setLocalTime(timeinfo);
+                }
             }
             mainState = mainState === OFF ? ON
                       : mainState === ON ? OFF
@@ -627,6 +632,27 @@
             if (adjustmentSubstate !== ENTER_ADJUSTMENT && adjustmentSubstate !== FLASH_NAME) {
                 adjustmentSubstate = FLASH_NAME;
                 adjustmentState++;
+                if (adjustmentState === YEAR) {
+                    // Start the date and time fields from the current time
+                    timeinfo = getLocalTime();
+                    timeChanged = false;
+                }
+            }
+        }
+
+        function checkAlarms() {
+            if (timeinfo.hour === orangeHour && timeinfo.min === orangeMinute) {
+                mainState = ON; colorState = CUSTOM_SELECTED; customColorWheelIndex = 28;
+                brightness = 1; update = true; autoOn = true;
+            }
+            if (timeinfo.hour === morningHour && timeinfo.min === morningMinute) {
+                mainState = ON; colorState = CUSTOM_SELECTED; customColorWheelIndex = 85;
+                brightness = 1; update = true; autoOn = true;
+            }
+            if (timeinfo.hour === morningHour + 1 && timeinfo.min === morningMinute && autoOn) {
+                mainState = OFF; update = true; autoOn = false;
+                customColorWheelIndex = eeprom.customColor & 0xFF;
+                colorState = constrain(eeprom.colorState, 0, 3);
             }
         }
 
@@ -648,18 +674,12 @@
             } else if (now - lastTimeSample > 100) {
                 timeinfo = getLocalTime();
                 lastTimeSample = now;
-                if (timeinfo.hour === orangeHour && timeinfo.min === orangeMinute) {
-                    mainState = ON; colorState = CUSTOM_SELECTED; customColorWheelIndex = 28;
-                    brightness = 1; update = true; autoOn = true;
-                }
-                if (timeinfo.hour === morningHour && timeinfo.min === morningMinute) {
-                    mainState = ON; colorState = CUSTOM_SELECTED; customColorWheelIndex = 85;
-                    brightness = 1; update = true; autoOn = true;
-                }
-                if (timeinfo.hour === morningHour + 1 && timeinfo.min === morningMinute && autoOn) {
-                    mainState = OFF; update = true; autoOn = false;
-                    customColorWheelIndex = eeprom.customColor & 0xFF;
-                    colorState = constrain(eeprom.colorState, 0, 3);
+                // Check the alarms once per minute, so turning the lamp off
+                // during the alarm minute sticks
+                const minuteOfDay = timeinfo.hour * 60 + timeinfo.min;
+                if (minuteOfDay !== lastAlarmCheck) {
+                    lastAlarmCheck = minuteOfDay;
+                    checkAlarms();
                 }
             }
 
@@ -720,13 +740,13 @@
                     case YEAR: dispChar('year'); break;
                     case MONTH: dispChar('mnth'); break;
                     case DAY: dispChar('dday', 0, 0b1000); break;
-                    case DOW: dispChar('ddow', 0, 0b1000); break;
                     case TIME_MINUTE: case TIME_HOUR: dispChar('cclk', 0, 0b1000); break;
                 }
                 return;
             }
             let hide = 0b1111, show = 0, commaEnable = 0b0100, value = 0;
             const d = adjustmentDiff;
+            if (d !== 0 && adjustmentState >= YEAR) timeChanged = true;
             switch (adjustmentState) {
                 case ORANGE_HOUR:
                     hide = 0b1100; orangeHour = wrapAround(orangeHour + d, 0, 23);
@@ -748,19 +768,17 @@
                     value = timeinfo.hour * 100 + timeinfo.min; break;
                 case DAY:
                     show = 0b1100; commaEnable = 0;
-                    timeinfo.mday = wrapAround(timeinfo.mday + d, 1, daysInMonth(timeinfo.year, timeinfo.mon));
+                    // Clamp the day first in case the month or year was changed
+                    const days = daysInMonth(timeinfo.year, timeinfo.mon);
+                    timeinfo.mday = wrapAround(Math.min(timeinfo.mday, days) + d, 1, days);
                     value = timeinfo.mday; break;
                 case MONTH:
                     show = 0b1100; commaEnable = 0;
                     timeinfo.mon = wrapAround(timeinfo.mon + d, 0, 11);
                     value = timeinfo.mon + 1; break;
                 case YEAR:
-                    commaEnable = 0; timeinfo.year += d;
+                    commaEnable = 0; timeinfo.year = constrain(timeinfo.year + d, 2000, 2099);
                     value = timeinfo.year; break;
-                case DOW:
-                    show = 0b1110; commaEnable = 0;
-                    timeinfo.wday = wrapAround(timeinfo.wday + d, 1, 7);
-                    value = timeinfo.wday; break;
             }
             disp(value, commaEnable, adjustmentSubstate === SHOW_VAL ? show : hide);
         }

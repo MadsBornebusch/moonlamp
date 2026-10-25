@@ -62,7 +62,7 @@ private:
     bool enableInterruptOutput();
     
     // Time conversion
-    tm readRTCTime();
+    bool readRTCTime(tm &time);
     bool writeRTCTime(const tm &time);
 };
 

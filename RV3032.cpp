@@ -101,13 +101,15 @@ bool RV3032::setTime(const tm &time) {
 
 // Get time to tm structure
 bool RV3032::getTime(tm &time) {
-    time = readRTCTime();
-    return true;
+    return readRTCTime(time);
 }
 
-// Get Norwegian local time (CEST in summer, CET in winter)
+// Get Norwegian local time (CEST in summer, CET in winter). The time is left
+// unchanged if the RTC can't be read.
 bool RV3032::getLocalTime(tm &time) {
-    time = readRTCTime();
+    if (!readRTCTime(time)) {
+        return false;
+    }
     time.tm_isdst = isDSTNorway(time);
     if (time.tm_isdst) {
         shiftHour(time, 1);
@@ -215,12 +217,15 @@ uint8_t RV3032::getStatus() {
     return readByte(RV3032_REG_STATUS);
 }
 
-// Read RTC time and convert to tm structure
-tm RV3032::readRTCTime() {
+// Read RTC time and convert to tm structure. Returns false, leaving the time
+// unchanged, if the read fails or gives an invalid time.
+bool RV3032::readRTCTime(tm &result) {
     tm time = {0};
     uint8_t data[7];
     
-    readBytes(RV3032_REG_SECONDS, data, 7);
+    if (!readBytes(RV3032_REG_SECONDS, data, 7)) {
+        return false;
+    }
     
     time.tm_sec = bcdToDec(data[0] & 0x7F);
     time.tm_min = bcdToDec(data[1] & 0x7F);
@@ -239,8 +244,15 @@ tm RV3032::readRTCTime() {
     } else {
         time.tm_year = 100;
     }
-    
-    return time;
+
+    if (time.tm_sec > 59 || time.tm_min > 59 || time.tm_hour > 23 ||
+        time.tm_mon < 0 || time.tm_mon > 11 || time.tm_mday < 1 ||
+        time.tm_mday > daysInMonth(time.tm_year + 1900, time.tm_mon)) {
+        return false;
+    }
+
+    result = time;
+    return true;
 }
 
 // Write tm structure to RTC
@@ -250,7 +262,8 @@ bool RV3032::writeRTCTime(const tm &time) {
     data[0] = decToBcd(time.tm_sec);
     data[1] = decToBcd(time.tm_min);
     data[2] = decToBcd(time.tm_hour);
-    data[3] = time.tm_wday & 0x07;
+    // The weekday is computed from the date (0-6, 0 = Sunday)
+    data[3] = dayOfWeek(time.tm_year + 1900, time.tm_mon + 1, time.tm_mday);
     data[4] = decToBcd(time.tm_mday);
     data[5] = decToBcd(time.tm_mon + 1);
     
