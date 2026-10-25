@@ -1,32 +1,32 @@
-# Moonlamp (Månelampe)
+# Moonlamp
 
-Arduino-basert månelampe med RTC (Real-Time Clock) og NeoPixel LED-lys.
+Arduino-based moon lamp with an RTC (real-time clock) and NeoPixel LEDs.
 
-## Funksjoner
+## Features
 
-- Tidsstyrt belysning med programmerbare tider for oransje/grønt lys
-- 14 NeoPixel LEDs med flere fargemodi
-- 4-sifret 7-segment display
-- 3 knapper for kontroll
-- RV3032 RTC for nøyaktig tidsstyring
+- Timed lighting with programmable times for orange/green light
+- 14 NeoPixel LEDs with several colour modes
+- 4-digit 7-segment display
+- 3 control buttons
+- RV3032 RTC for accurate timekeeping
 
-## Brukerveiledning
+## User guide
 
-En interaktiv brukerveiledning er tilgjengelig på:
+An interactive user guide is available at:
 **[https://MadsBornebusch.github.io/moonlamp/](https://MadsBornebusch.github.io/moonlamp/)**
 
 
 ## Hardware
 
-- Arduino (kompatibel med ATmega328P)
-- RV3032 RTC-modul
+- Arduino (ATmega328P compatible)
+- RV3032 RTC module
 - 14x NeoPixel LEDs (WS2812B)
-- 4-sifret 7-segment display (felles katode)
-- 3x trykknopper
+- 4-digit 7-segment display (common cathode)
+- 3x push buttons
 
-## Programvare
+## Software
 
 - Arduino IDE
-- Adafruit NeoPixel-bibliotek
-- RV3032 RTC-bibliotek (inkludert)
-- PlatformIO (valgfritt): se `platformio.ini`. `pio run -e uart -t upload` laster opp via bootloader (trykk reset når opplastingen starter).
+- Adafruit NeoPixel library
+- RV3032 RTC library (included)
+- PlatformIO (optional): see `platformio.ini`. `pio run -e uart -t upload` uploads through the bootloader (press reset when the upload starts).
