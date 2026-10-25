@@ -29,3 +29,4 @@ En interaktiv brukerveiledning er tilgjengelig på:
 - Arduino IDE
 - Adafruit NeoPixel-bibliotek
 - RV3032 RTC-bibliotek (inkludert)
+- PlatformIO (valgfritt): se `platformio.ini`. `pio run -e uart -t upload` laster opp via bootloader (trykk reset når opplastingen starter).
