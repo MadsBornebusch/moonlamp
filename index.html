@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="no">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Månelampe – interaktiv brukerveiledning</title>
+    <title>Moon Lamp Guide</title>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Google Font -->
@@ -42,7 +42,7 @@
         }
         .moon-header {
             background: #0f1a2b;
-            padding: 20px 20px 15px 20px; /* Redusert padding for bedre plass */
+            padding: 20px 20px 15px 20px; /* Reduced padding to save space */
             text-align: center;
             border-bottom: 2px solid #f7c35c;
             position: relative;
@@ -332,7 +332,7 @@
             color: #1d1e2c;
             font-weight: 700;
         }
-        /* Responsive justeringer */
+        /* Responsive adjustments */
         @media (max-width: 700px) {
             .button-row {
                 gap: 15px;
@@ -368,8 +368,8 @@
 <body>
     <div class="manual-card">
         <div class="moon-header">
-            <h1>🌙 Månelampe</h1>
-            <div class="sub">søvntrener med varmt lys</div>
+            <h1>🌙 Moon Lamp</h1>
+            <div class="sub">sleep trainer with warm light</div>
 
             <div class="interactive-moon">
                 <div class="moon-display" id="moonSphere">
@@ -383,82 +383,82 @@
                 <div class="seg-display" id="segDisplay" role="img" aria-label="Display"></div>
 
                 <div class="button-row">
-                    <button class="moon-btn" id="btnLeft" title="Venstre knapp (farge, minus i innstillinger)"><i class="fas fa-palette"></i> VENSTRE</button>
-                    <button class="moon-btn" id="btnMid" title="Midtre knapp (av/på, hold for innstillinger)"><i class="fas fa-power-off"></i> MIDTRE</button>
-                    <button class="moon-btn" id="btnRight" title="Høyre knapp (lysstyrke, pluss i innstillinger)"><i class="fas fa-sun"></i> HØYRE</button>
+                    <button class="moon-btn" id="btnLeft" title="Left button (colour, minus in settings)"><i class="fas fa-palette"></i> LEFT</button>
+                    <button class="moon-btn" id="btnMid" title="Middle button (on/off, hold for settings)"><i class="fas fa-power-off"></i> MIDDLE</button>
+                    <button class="moon-btn" id="btnRight" title="Right button (brightness, plus in settings)"><i class="fas fa-sun"></i> RIGHT</button>
                 </div>
-                <p class="sim-hint"><i class="fas fa-hand-pointer"></i> Prøv knappene. Hold MIDTRE i 1,5 sek for innstillinger.</p>
+                <p class="sim-hint"><i class="fas fa-hand-pointer"></i> Try the buttons. Hold MIDDLE for 1.5 s for settings.</p>
                 <div class="sim-clock">
-                    <span>Lampens klokke: <strong id="simClock">–</strong></span>
-                    <button type="button" id="jumpOrange">Hopp til oransje lys</button>
-                    <button type="button" id="jumpMorning">Hopp til grønt lys</button>
-                    <button type="button" id="resetClock">Nullstill klokka</button>
+                    <span>Lamp's clock: <strong id="simClock">–</strong></span>
+                    <button type="button" id="jumpOrange">Jump to orange light</button>
+                    <button type="button" id="jumpMorning">Jump to green light</button>
+                    <button type="button" id="resetClock">Reset clock</button>
                 </div>
             </div>
         </div>
 
         <div class="content">
             <div class="quick-start">
-                <h2>⚡ Hurtigveiledning</h2>
+                <h2>⚡ Quick start</h2>
                 <div class="steps">
-                    <div class="step"><i class="fas fa-plug"></i><br><span class="btn-icon">1</span> Koble til USB</div>
-                    <div class="step"><i class="fas fa-circle" style="color: #ffe59a;"></i><br><span class="btn-icon">2</span> MIDTRE = på/av</div>
-                    <div class="step"><i class="fas fa-paint-brush"></i><br><span class="btn-icon">3</span> VENSTRE = farge</div>
-                    <div class="step"><i class="fas fa-adjust"></i><br><span class="btn-icon">4</span> HØYRE = lysstyrke</div>
+                    <div class="step"><i class="fas fa-plug"></i><br><span class="btn-icon">1</span> Plug in USB</div>
+                    <div class="step"><i class="fas fa-circle" style="color: #ffe59a;"></i><br><span class="btn-icon">2</span> MIDDLE = on/off</div>
+                    <div class="step"><i class="fas fa-paint-brush"></i><br><span class="btn-icon">3</span> LEFT = colour</div>
+                    <div class="step"><i class="fas fa-adjust"></i><br><span class="btn-icon">4</span> RIGHT = brightness</div>
                 </div>
             </div>
 
             <div class="detail-section">
                 <div class="detail-item">
                     <div class="detail-header" onclick="toggleDetail(this)">
-                        <i class="fas fa-chevron-right"></i> <span>🔹 Detaljert funksjonalitet</span>
+                        <i class="fas fa-chevron-right"></i> <span>🔹 How it works</span>
                     </div>
                     <div class="detail-content">
-                        <p><strong>Fargevalg (venstre knapp):</strong> Varmhvitt → Kaldhvitt → Fargehjul (ruller automatisk) → Låst farge (trykk igjen for å lagre) → tilbake til varmhvitt.</p>
-                        <p><strong>Lysstyrke (høyre knapp):</strong> 5 nivåer. Nivå 1: svakest, nivå 5: sterkest. Både prikker og månens lysstyrke endres.</p>
-                        <p><strong>Av/på (midtre knapp):</strong> Kort trykk veksler av/på.</p>
-                        <p><strong>Automatisk morgenrutine:</strong> <code>oran</code> = oransje (snart morgen), <code>morn</code> = grønn (oppvåkning – varer 1 time). Trykk på en knapp for å overstyre.</p>
+                        <p><strong>Colour (left button):</strong> Warm white → Cool white → Colour wheel (cycles automatically) → Locked colour (press again to save) → back to warm white.</p>
+                        <p><strong>Brightness (right button):</strong> 5 levels. Level 1 is the dimmest, level 5 the brightest. Both the dots and the moon change brightness.</p>
+                        <p><strong>On/off (middle button):</strong> A short press switches the lamp on or off.</p>
+                        <p><strong>Automatic morning routine:</strong> <code>oran</code> = orange (morning soon), <code>morn</code> = green (time to get up – lasts 1 hour). Press any button to override.</p>
                     </div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-header" onclick="toggleDetail(this)">
-                        <i class="fas fa-chevron-right"></i> <span>⏰ Stille inn klokke og vekketider</span>
+                        <i class="fas fa-chevron-right"></i> <span>⏰ Setting the clock and wake-up times</span>
                     </div>
                     <div class="detail-content">
-                        <p><strong>Innstillingsmodus:</strong> Hold inne <code>MIDTRE</code> i 1,5 sek. Display viser <code>inst</code>.</p>
-                        <p><strong>Naviger:</strong> Kort trykk MIDTRE for å lagre og gå videre. Bruk VENSTRE/HØYRE for å endre verdi (ruller rundt).</p>
+                        <p><strong>Settings mode:</strong> Hold <code>MIDDLE</code> for 1.5 s. The display shows <code>inst</code>.</p>
+                        <p><strong>Navigate:</strong> A short press on MIDDLE saves and moves on. Use LEFT/RIGHT to change the value (it wraps around).</p>
                         <ul>
-                            <li><code>oran</code> – time/minutt for oransje lys</li>
-                            <li><code>morn</code> – time/minutt for grønt lys</li>
-                            <li><code>year</code> – år (4 siffer)</li>
-                            <li><code>mnth</code> – måned (1–12)</li>
-                            <li><code>day</code> – dag (venstre to slukket) f.eks. <code> 5</code></li>
-                            <li><code>clk</code> – nåværende klokkeslett (time, minutt)</li>
+                            <li><code>oran</code> – hour/minute for the orange light</li>
+                            <li><code>morn</code> – hour/minute for the green light</li>
+                            <li><code>year</code> – year (4 digits)</li>
+                            <li><code>mnth</code> – month (1–12)</li>
+                            <li><code>day</code> – day (left two digits off), e.g. <code> 5</code></li>
+                            <li><code>clk</code> – current time (hour, minute)</li>
                         </ul>
-                        <p><strong>Sommer-/vintertid:</strong> Still inn klokka slik den er nå (sommertid om sommeren). Lampen bytter automatisk mellom sommer- og vintertid.</p>
-                        <p><strong>Avslutt:</strong> Etter siste minutt-innstilling, trykk MIDTRE kort – lampen slår seg av og klokka lagres (sekundene settes til 0). Klokka endres bare hvis du har endret dato eller tid. <br>Hold MIDTRE inne 1,5 sek for å avslutte uten å lagre dato og tid.</p>
+                        <p><strong>Summer/winter time:</strong> Set the clock to the time it is now (summer time in summer). The lamp switches between summer and winter time automatically.</p>
+                        <p><strong>Exit:</strong> After the last minute setting, press MIDDLE briefly – the lamp switches off and the clock is saved (seconds are set to 0). The clock is only changed if you changed the date or time. <br>Hold MIDDLE for 1.5 s to exit without saving the date and time.</p>
                     </div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-header" onclick="toggleDetail(this)">
-                        <i class="fas fa-chevron-right"></i> <span>💡 Display-symboler</span>
+                        <i class="fas fa-chevron-right"></i> <span>💡 Display symbols</span>
                     </div>
                     <div class="detail-content">
-                        <p>Displayet er mørkt til vanlig og lyser bare ved oppstart og i innstillingsmodus.</p>
-                        <p>Punktum (<code>.</code>) lyser mellom timer og minutter, f.eks. <code>12.30</code>. Under innstillinger slukkes sifre som ikke er i bruk (f.eks. dag: <code> 5</code>), og verdien du endrer blinker.</p>
+                        <p>The display is normally dark and only lights up at startup and in settings mode.</p>
+                        <p>A dot (<code>.</code>) separates hours and minutes, e.g. <code>12.30</code>. In settings, unused digits are switched off (e.g. day: <code> 5</code>), and the value you are changing blinks.</p>
                     </div>
                 </div>
             </div>
 
             <div class="viktig">
                 <i class="fas fa-exclamation-triangle" style="font-size:1.8rem; float:left; margin-right:15px;"></i>
-                <strong>⚠️ 24 timers klokkebackup:</strong> Kondensator holder klokken i kun ~24 timer uten strøm. Hvis lampen er frakoblet lenger, nullstilles klokken – da må den stilles på nytt (se over).
+                <strong>⚠️ 24 hour clock backup:</strong> A capacitor keeps the clock running for only ~24 hours without power. If the lamp is unplugged for longer, the clock resets and has to be set again (see above).
             </div>
 
             <hr>
             <footer>
-                <p>✨ Simulatoren øverst oppfører seg som lampen – prøv knappene og innstillingsmenyen! ✨</p>
-                <p><i class="fas fa-heart" style="color:#ffab4f;"></i> Søte drømmer fra Månelampen</p>
+                <p>✨ The simulator at the top behaves like the lamp – try the buttons and the settings menu! ✨</p>
+                <p><i class="fas fa-heart" style="color:#ffab4f;"></i> Sweet dreams from the Moon Lamp</p>
             </footer>
         </div>
     </div>
@@ -827,7 +827,8 @@
         });
         const moon = document.getElementById('moonSphere');
         const simClock = document.getElementById('simClock');
-        const WEEKDAYS = ['søn', 'man', 'tir', 'ons', 'tor', 'fre', 'lør'];
+        const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const pad = n => String(n).padStart(2, '0');
 
         function render() {
@@ -869,7 +870,7 @@
             }
 
             const t = getLocalTime();
-            simClock.textContent = `${WEEKDAYS[t.wday]} ${t.mday}.${t.mon + 1}.${t.year} ${pad(t.hour)}:${pad(t.min)}:${pad(t.sec)}`;
+            simClock.textContent = `${WEEKDAYS[t.wday]} ${t.mday} ${MONTHS[t.mon]} ${t.year} ${pad(t.hour)}:${pad(t.min)}:${pad(t.sec)}`;
         }
 
         // ---- Buttons ----
